@@ -44,15 +44,25 @@ const update = () => {
 };
 
 const listenToQueues = (queues) => {
-  Object.entries(queues).forEach((queue) => {
-    queue.on
-  })
+  Object.entries(queues).forEach((name, queue) => {
+    this.listenToQueue(queue, name);
+  });
 }
 
-module.exports = ({queues, numRequests}) => {
+const listenToQueue = (queue, name) => {
+  queue.on('event')
+}
+
+const removeBar = () => {
+  clearInterval(this.updateTimeout);
+}
+
+module.exports = ({ queues, numRequests }) => {
   const bar = new ProgressBar('fetching [:bar] :current/:total :percent \n :currentItem \n :blocked \n Fetched: :fetched \n Queued: :queued \n :messsage', {
     total: numRequests
   });
+
+  this.updateTimeout = setInterval(this.update, 1000);
 
   bar.queues = queues;
   bar.update = update;
