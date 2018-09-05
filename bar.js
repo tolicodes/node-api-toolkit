@@ -6,10 +6,10 @@ const update = () => {
 
   // blocked endpoints
   const blocks = Object.entries(blockedEndpoints)
-    .map(([ep, endBlock]) => {
+    .map(([queueName, endBlock]) => {
       const secs = (endBlock - new Date()) / 1000;
       if (secs > 0) {
-        return `${ep} ${parseInt((secs / 60), 10)}m ${parseInt(secs % 60, 10)}s left`;
+        return `${queueName} ${parseInt((secs / 60), 10)}m ${parseInt(secs % 60, 10)}s left`;
       }
       return '';
     })
@@ -57,12 +57,10 @@ const removeBar = () => {
   clearInterval(this.updateTimeout);
 }
 
-module.exports = ({ queues, numRequests }) => {
-  const bar = new ProgressBar('fetching [:bar] :current/:total :percent \n :currentItem \n :blocked \n Fetched: :fetched \n Queued: :queued \n :messsage', {
-    total: numRequests
-  });
+module.exports = ({ queues }) => {
+  const bar = new ProgressBar('fetching [:bar] :current/:total :percent \n :currentItem \n :blocked \n Fetched: :fetched \n Queued: :queued \n :messsage');
 
-  this.updateTimeout = setInterval(this.update, 1000);
+  bar.updateTimeout = setInterval(this.update, 1000);
 
   bar.queues = queues;
   bar.update = update;

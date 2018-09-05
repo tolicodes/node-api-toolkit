@@ -30,7 +30,7 @@ class Queue {
     constructor({
         maxConcurrent = Infinity,
         retry = false,
-        retryTimes = 3,
+        maxRetries = 3,
         retryWaitTime = 0
     }) {
         Object.assign(this, {
@@ -179,6 +179,15 @@ class Queue {
 
     getNumberFailed() {
         return this.failed.length;
+    }
+
+    getTotal() {
+        return (
+            this.getNumberQueued() +
+            this.getNumberPending() +
+            this.getNumberComplete() +
+            this.getNumberFailed()
+        );
     }
 }
 
