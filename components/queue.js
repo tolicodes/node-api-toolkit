@@ -1,3 +1,5 @@
+const wait = require('../utils/wait');
+
 const ALL_EVENTS = [
     'queued',
     'start',
@@ -12,8 +14,9 @@ class Queue {
         maxConcurrent = Infinity,
         retry = false,
         maxRetries = 3,
-        retryWaitTime = 0
-    }) {
+        retryWaitTime = 0,
+        waitBetweenRequests = 1000,
+    } = {}) {
         Object.assign(this, {
             // Options
 
@@ -25,14 +28,13 @@ class Queue {
             retry,
             maxRetries,
             retryWaitTime,
+            waitBetweenRequests,
 
             // lists of promises
             queued: [],
             pending: [],
             complete: [],
             failed: [],
-
-            maxConcurrent: Infinity,
 
             eventListeners: {},
 
@@ -43,6 +45,9 @@ class Queue {
 
             // maps promises to their names
             promiseNameMap: [],
+
+            stopped: true,
+            
         });
 
 
@@ -57,13 +62,13 @@ class Queue {
     }
 
     triggerEvent(event, promise) {
+        if (!this.eventListeners[event]) return;
         this.eventListeners[event].forEach((cb) => {
             cb(promise);
         });
     }
 
     add(func, { name } = {}) {
-        console.log('added', name)
         const promise = new Promise((resolve) => {
             this.queued.push(async () => {
                 const result = await func();
@@ -79,6 +84,12 @@ class Queue {
             this.promiseNameMap.push([name, promise]);
         }
 
+        setTimeout(() => {
+            if (this.stopped) {
+                this.process();
+            }
+        })
+
         return promise;
     }
 
@@ -92,10 +103,16 @@ class Queue {
         this[from].splice(this[from].indexOf(item));
     }
 
-    async processNextItem() {
+    async processNextItem(tryNumber = 0) {
         if (this.block) {
             await this.block;
         }
+
+        if (this.waitBetweenRequests) {
+            await wait(this.waitBetweenRequests);
+        }
+
+        if(!this.queued.length) { return }
 
         if (this.pending.length <= this.maxConcurrent) {
             const promise = this.queued[0]();
@@ -105,27 +122,33 @@ class Queue {
             promise.then(() => {
                 this.moveLists(promise, 'pending', 'complete');
                 this.triggerEvent('complete', promise);
-            }).catch(async () => {
+            }).catch(async (e) => {
                 if (this.retry) {
-                    let tryNumber = 0;
-
                     while (tryNumber < this.maxRetries) {
-                        this.processNextItem();
+                        console.log(tryNumber)
+                        const res = await this.processNextItem(tryNumber);
+
+                        if(res) return;
                     }
                 }
 
                 this.moveLists(promise, 'pending', 'failed');
                 this.triggerEvent('failed', promise);
+                
+                // throw e;
             });
+
+            // process next
+            return true;
         } else {
             // wait for something to succeed or fail
-            await Promise.race(this.pending);
+            return Promise.race(this.pending);
         }
     }
 
     async process() {
         while (this.queued.length) {
-            this.processNextItem();
+            await this.processNextItem();
         }
 
         return Promise.all(this.pending)
@@ -211,15 +234,6 @@ class Queue {
     }
 
     getTotal() {
-        console.log(
-            'tot',
-
-            this.getNumberQueued() +
-            this.getNumberPending() +
-            this.getNumberComplete() +
-            this.getNumberFailed()
-        )
-
         return (
             this.getNumberQueued() +
             this.getNumberPending() +

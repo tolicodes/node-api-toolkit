@@ -1,6 +1,12 @@
-const ProgressBar = require('progress');
+const term = require('terminal-kit').terminal;
 
-const INDENT = '\n       ';
+const STATUSES = [
+  'pending',
+  'blocked',
+  'queued',
+  'complete',
+  'failed',
+];
 
 class Bar {
   constructor({
@@ -9,17 +15,30 @@ class Bar {
     this.updateTimeout = setInterval(this.update.bind(this), 1000);
     this.queues = queues;
 
-    this.bar = new ProgressBar(`
-fetching [:bar] :current/:total :percent
-Currently Fetching: :fetching
-Block Status:       :blocked
-Queued:             :queued
-Fetched:            :fetched
-Failed:             :failed
-  `, {
-      total: 1
-    });
+    this.indent = ' '.repeat('Currently Fetching: '.length);
 
+    this.statuses = {
+      pending: {
+        label: 'Currently Fetching',
+        color: term.yellow,
+      },
+      blocked: {
+        label: 'Block Status',
+        color: term.magenta,
+      },
+      queued: {
+        label: 'Queued',
+        color: term.gray,
+      },
+      complete: {
+        label: 'Fetched',
+        color: term.green,
+      },
+      failed: {
+        label: 'Failed',
+        color: term.red,
+      }
+    };
   }
 
   getBlockedQueues() {
@@ -32,22 +51,22 @@ Failed:             :failed
   }
 
   getStatusCount(status) {
-    return Object.entries(this.queues).reduce((out, [name, queue]) => {
+    return Object.entries(this.queues).reduce((out, [, queue]) => {
       if(queue[status].length) {
-        out[name] = queue[status].length;
+        return out + queue[status].length;
       }
       return out;
-    }, {});
+    }, 0);
   }
 
   getStatusCountMessage(status) {
     const counts = this.getStatusCount(status);
-    return INDENT + Object.entries(counts)
+    return Object.entries(counts)
     
     .map(([ep, count]) => (
       `${ep}: ${count}`
     ))
-    .join(INDENT);
+    .join(this.indent);
   }
 
   getPromisesForStatus(status) {
@@ -63,10 +82,7 @@ Failed:             :failed
     return Object.values(this.queues).reduce((out, queue) => {
       if (out) return out;
 
-      const name = queue.getPromiseName(promise);
-      if (name) {
-        return name;
-      }
+      return queue.getPromiseName(promise);
     }, null);
   }
 
@@ -74,8 +90,6 @@ Failed:             :failed
   update() {
     // wait until we have a queue
     if (!Object.values(this.queues).length) return;
-
-    console.log(this.queues)
 
     // blocked endpoints
     const blocks = Object.entries(this.getBlockedQueues())
@@ -87,28 +101,36 @@ Failed:             :failed
         return '';
       })
       .filter(t => t)
-      .join(INDENT);
+      .join(this.indent);
 
-    const complete = this.getStatusCountMessage('complete');
-    const queued = this.getStatusCountMessage('queued');
-    const pending = this.getPromisesForStatus('pending');
-    const failed = this.getStatusCountMessage('failed');
+    const pendingPromises = this.getPromisesForStatus('pending')
+    const pendingMessage = pendingPromises.length
+      ? pendingPromises.map(this.getPromiseName.bind(this)).join(this.indent)
+      : 'None';
 
-    // clears the screen so that the progress bar isn't scrolling text
-    // console.clear();
-
-    // this.bar.total = this.getQueuesTotals();
-    console.log('total', this.getQueuesTotals())
-
-    this.bar.tick(0, {
-      fetching: pending.length
-          ? pending.map(this.getPromiseName.bind(this)).join(INDENT)
-          : 'None',
+    const messages = {
+      pending: pendingMessage,
       blocked: blocks || 'All Endpoints Unblocked',
-      fetched: complete,
-      failed: failed.length,
-      queued: queued.length,
-    });
+      queued: this.getStatusCount('queued'),
+      complete: this.getStatusCount('complete'),
+      failed: this.getStatusCount('failed'),
+    }
+
+    // term.clear();
+
+    // STATUSES.forEach((status) => {
+    //   const { color, label } = this.statuses[status];
+    //   const indent = ' '.repeat(this.indent.length - label.length);
+    //   color(label + indent + messages[status] + '\n');
+    // });
+  }
+
+  drawBar() {
+
+    const message = ``
+    return (
+      `[]`
+    )
   }
 
   getQueuesTotals() {
