@@ -202,7 +202,14 @@ class Queue {
   }
 
   blockQueue(unblockIn) {
-    console.log('unlbock in 1', unblockIn);
+    if (this.blocked && this.block) {
+      if(unblockIn) {
+        clearTimeout(this.unblockTimeout);
+        this.unblockTimeout = setTimeout(() => console.log('unb 2') && this.unblockQueue(), parseInt(unblockIn, 10));
+        this.blockEnd = moment().add(unblockIn, 'ms');
+      }
+      return this.block;
+    }
 
     this.block = new Promise((resolve) => {
       this.unblock = resolve;
@@ -210,7 +217,7 @@ class Queue {
 
       if (unblockIn) {
         console.log('unlbock in ', unblockIn);
-        setTimeout(() => console.log('unb') && this.unblockQueue(), unblockIn);
+        this.unblockTimeout = setTimeout(() => console.log('unb', this) && this.unblockQueue(), parseInt(unblockIn, 10));
         this.blockEnd = moment().add(unblockIn, 'ms');
       }
     });

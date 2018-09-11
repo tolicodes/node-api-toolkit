@@ -25,7 +25,7 @@ class Bar {
       },
       blocked: {
         label: 'Block Status',
-        color: term.magenta,
+        color: term.blue,
       },
       queued: {
         label: 'Queued',
