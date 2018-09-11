@@ -22,34 +22,40 @@ class Bar {
       pending: {
         label: 'Currently Fetching',
         color: term.yellow,
+        bg: term.bgYellow,
       },
       blocked: {
         label: 'Block Status',
         color: term.blue,
+        bg: term.bgBlue,
       },
       queued: {
         label: 'Queued',
         color: term.gray,
+        bg: term.bgGray,
       },
       complete: {
         label: 'Fetched',
         color: term.green,
+        bg: term.bgGreen,
       },
       failed: {
         label: 'Failed',
         color: term.red,
+        bg: term.bgRed,
       },
       total: {
         label: 'Total',
         color: term.black,
+        bg: term.bgBlack,
       },
     };
   }
 
   getBlockedQueues() {
     return Object.entries(this.queues).reduce((out, [name, queue]) => {
-      if (queue.blocked && queue.blockEnd) {
-        out[name] = queue.blockEnd;
+      if (queue.blocked) {
+        out[name] = queue.blockEnd || null;
       }
       return out;
     }, {});
@@ -105,6 +111,7 @@ class Bar {
     // blocked endpoints
     const blocks = Object.entries(this.getBlockedQueues())
       .map(([queueName, blockEnd]) => {
+        if (blockEnd === null) return `${queueName} BLOCKED`;
         const left = this.formatDuration(moment(blockEnd).diff(moment()));
         return `${queueName} ${left} left`;
       })
@@ -127,20 +134,41 @@ class Bar {
       total: this.getQueuesTotals(),
     };
 
-    // term.clear();
+    term.clear();
 
     STATUSES.forEach((status) => {
       const { color, label } = this.statuses[status];
       const indent = ' '.repeat(this.indent.length - label.length);
       color(`${label + indent + messages[status]}\n`);
     });
+
+    this.drawBar();
   }
 
   drawBar() {
-    const message = '';
-    return (
-      '[]'
-    );
+    const total = this.getQueuesTotals();
+    const width = (term.width - 4) / total;
+
+    const counts = {
+      failed: this.getStatusCount('failed'),
+      complete: this.getStatusCount('complete'),
+      pending: this.getStatusCount('pending'),
+      queued: this.getStatusCount('queued'),
+    };
+
+    let widthSoFar = 0;
+
+    term.defaultColor('[ ');
+    Object.entries(counts).forEach(([name, count]) => {
+      const sectionWidth = count * width;
+      widthSoFar += 1;
+      this.statuses[name].bg(' '.repeat(Math.floor(sectionWidth)));
+    });
+
+    // since we are doing Math.floor we will bar some bar left over
+    term.defaultColor(' '.repeat(width - widthSoFar));
+
+    term.defaultColor(' ]');
   }
 
   getQueuesTotals() {

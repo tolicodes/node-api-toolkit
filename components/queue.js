@@ -124,43 +124,42 @@ class Queue {
   }
 
   async processNextItem(tryNumber = 0) {
-    if (this.blocked) {
-      console.log('waiting');
-      await this.block;
-      console.log('unblocked');
-    }
-
     if (this.waitBetweenRequests) {
       await wait(this.waitBetweenRequests);
     }
 
-    if (!this.queued.length) { return false; }
-
     if (this.pending.length < this.maxConcurrent) {
-      const promise = this.queuedFuncs.shift()();
+      if (!this.queued.length) { return false; }
+      this.moveLists(this.queued[0], 'queued', 'pending');
 
-      this.moveLists(promise, 'queued', 'pending');
+      if (this.blocked) {
+        console.log('waiting', this.queued[0]);
+        await this.block;
+        console.log('unblocked');
+      }
+
+      const promise = this.queuedFuncs.shift()();
 
       promise.then(() => {
         this.moveLists(promise, 'pending', 'complete');
         this.triggerEvent('complete', promise);
       }).catch(async (e) => {
-        // // the parent's while will handle retries
-        // if (tryNumber > 0) return;
+        // the parent's while will handle retries
+        if (tryNumber > 0) return;
 
-        // if (this.retry) {
-        //   while (tryNumber < this.maxRetries) {
-        //     console.log('try', tryNumber);
-        //     const res = await this.processNextItem(tryNumber + 1);
+        if (this.retry) {
+          while (tryNumber < this.maxRetries) {
+            console.log('try', tryNumber);
+            const res = await this.processNextItem(tryNumber + 1);
 
-        //     if (res) return;
-        //   }
-        // }
+            if (res) return;
+          }
+        }
 
-        // this.moveLists(promise, 'pending', 'failed');
-        // this.triggerEvent('failed', promise);
+        this.moveLists(promise, 'pending', 'failed');
+        this.triggerEvent('failed', promise);
 
-        // // throw e;
+        // throw e;
       });
 
       // process next
@@ -171,7 +170,7 @@ class Queue {
   }
 
   async process() {
-    while (this.queuedFuncs.length) {
+    for (;this.queuedFuncs.length;) {
       await this.processNextItem();
     }
 
@@ -201,29 +200,35 @@ class Queue {
     return this;
   }
 
+  setUnblockTimeout(unblockIn) {
+    if (!unblockIn || unblockIn < 0) return;
+
+    if (this.unblockTimeout) {
+      clearTimeout(this.unblockTimeout);
+    }
+
+    this.unblockTimeout = setTimeout(() => {
+      console.log('unb 2', this.unblockQueue, this.unblock);
+      this.unblockQueue();
+    }, unblockIn, 10);
+
+    this.blockEnd = moment().add(unblockIn, 'ms');
+  }
+
   blockQueue(unblockIn) {
     if (this.blocked && this.block) {
-      if(unblockIn) {
-        clearTimeout(this.unblockTimeout);
-        this.unblockTimeout = setTimeout(() => console.log('unb 2') && this.unblockQueue(), parseInt(unblockIn, 10));
-        this.blockEnd = moment().add(unblockIn, 'ms');
-      }
+      this.setUnblockTimeout(unblockIn);
       return this.block;
     }
+
+    this.pending.forEach((promise) => {
+      this.triggerEvent('blocked', promise);
+    });
 
     this.block = new Promise((resolve) => {
       this.unblock = resolve;
       this.blocked = true;
-
-      if (unblockIn) {
-        console.log('unlbock in ', unblockIn);
-        this.unblockTimeout = setTimeout(() => console.log('unb', this) && this.unblockQueue(), parseInt(unblockIn, 10));
-        this.blockEnd = moment().add(unblockIn, 'ms');
-      }
-    });
-
-    this.pending.forEach((promise) => {
-      this.triggerEvent('blocked', promise);
+      this.setUnblockTimeout(unblockIn);
     });
 
     return this.block;
