@@ -161,12 +161,12 @@ class Bar {
     term.defaultColor('[ ');
     Object.entries(counts).forEach(([name, count]) => {
       const sectionWidth = count * width;
-      widthSoFar += 1;
+      widthSoFar += sectionWidth;
       this.statuses[name].bg(' '.repeat(Math.floor(sectionWidth)));
     });
 
     // since we are doing Math.floor we will bar some bar left over
-    term.defaultColor(' '.repeat(width - widthSoFar));
+    term.defaultColor(' '.repeat(term.width - 4 - widthSoFar));
 
     term.defaultColor(' ]');
   }

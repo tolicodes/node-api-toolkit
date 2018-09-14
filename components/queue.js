@@ -133,9 +133,7 @@ class Queue {
       this.moveLists(this.queued[0], 'queued', 'pending');
 
       if (this.blocked) {
-        console.log('waiting', this.queued[0]);
         await this.block;
-        console.log('unblocked');
       }
 
       const promise = this.queuedFuncs.shift()();
@@ -143,13 +141,12 @@ class Queue {
       promise.then(() => {
         this.moveLists(promise, 'pending', 'complete');
         this.triggerEvent('complete', promise);
-      }).catch(async (e) => {
+      }).catch(async () => {
         // the parent's while will handle retries
         if (tryNumber > 0) return;
 
         if (this.retry) {
           while (tryNumber < this.maxRetries) {
-            console.log('try', tryNumber);
             const res = await this.processNextItem(tryNumber + 1);
 
             if (res) return;
@@ -158,8 +155,6 @@ class Queue {
 
         this.moveLists(promise, 'pending', 'failed');
         this.triggerEvent('failed', promise);
-
-        // throw e;
       });
 
       // process next
@@ -208,7 +203,6 @@ class Queue {
     }
 
     this.unblockTimeout = setTimeout(() => {
-      console.log('unb 2', this.unblockQueue, this.unblock);
       this.unblockQueue();
     }, unblockIn, 10);
 
@@ -235,11 +229,9 @@ class Queue {
   }
 
   unblockQueue() {
-    console.log('func', this.unblock);
     if (!this.unblock) return;
 
     this.unblock();
-    console.log('trigger unblock');
     this.blocked = false;
 
     delete this.unblock;
