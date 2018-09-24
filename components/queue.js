@@ -136,12 +136,14 @@ class Queue {
         await this.block;
       }
 
-      const promise = this.queuedFuncs.shift()();
+      let promise;
 
-      promise.then(() => {
+      try {
+        promise = this.queuedFuncs.shift()();
+        await promise;
         this.moveLists(promise, 'pending', 'complete');
         this.triggerEvent('complete', promise);
-      }).catch(async () => {
+      } catch (e) {
         // the parent's while will handle retries
         if (tryNumber > 0) return;
 
@@ -155,7 +157,7 @@ class Queue {
 
         this.moveLists(promise, 'pending', 'failed');
         this.triggerEvent('failed', promise);
-      });
+      }
 
       // process next
       return true;
@@ -165,7 +167,7 @@ class Queue {
   }
 
   async process() {
-    for (;this.queuedFuncs.length;) {
+    while (this.queuedFuncs.length) {
       await this.processNextItem();
     }
 
