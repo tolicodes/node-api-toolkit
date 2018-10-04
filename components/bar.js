@@ -126,7 +126,7 @@ class Bar {
       : 'None';
 
     const messages = {
-      pending: pendingMessage,
+      pending: pendingMessage.substring(0, term.width - this.indent.length),
       blocked: blocks || 'All Endpoints Unblocked',
       queued: this.getStatusCount('queued'),
       complete: this.getCompleteMessage('complete'),
@@ -175,18 +175,9 @@ class Bar {
     return Object.values(this.queues).reduce((total, queue) => total + queue.getTotal(), 0);
   }
 
-  listenToQueues(queues) {
-    Object.entries(queues).forEach((name, queue) => {
-      this.listenToQueue(queue, name);
-    });
-  }
-
-  listenToQueue(queue, name) {
-    queue.on('event');
-  }
-
   removeBar() {
     clearInterval(this.updateTimeout);
+    term.clear();
   }
 }
 

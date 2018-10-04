@@ -94,10 +94,10 @@ class Queue {
     this.queued.push(wrapperPromise);
     this.triggerEvent('queued', wrapperPromise);
 
-    this.queuedFuncs.push(() => {
-      func().then(resolve).catch(reject);
-
-      return wrapperPromise;
+    this.queuedFuncs.push(async () => {
+      const result = await func();
+      resolve(result);
+      return result;
     });
 
     setTimeout(() => {
@@ -116,48 +116,49 @@ class Queue {
 
   moveLists(item, from, to) {
     if (!this[from].includes(item)) {
-      throw Error(`Promise is not in list ${from}`);
+      throw Error(`Promise ${this.getPromiseName(item)} is not in list ${from}`);
     }
 
     this[to].push(item);
     this[from].splice(this[from].indexOf(item), 1);
   }
 
-  async processNextItem(tryNumber = 0) {
+  async runFunction(func, promise, tryNumber = 0) {
     if (this.waitBetweenRequests) {
       await wait(this.waitBetweenRequests);
     }
 
+    if (this.blocked) {
+      await this.block;
+    }
+
+    try {
+      await func();
+      this.moveLists(promise, 'pending', 'complete');
+      this.triggerEvent('complete', promise);
+    } catch (e) {
+      if (this.retry) {
+        if (tryNumber < this.maxRetries) {
+          const res = await this.runFunction(func, promise, tryNumber + 1);
+
+          if (res) return true;
+        }
+      }
+
+      this.moveLists(promise, 'pending', 'failed');
+      this.triggerEvent('failed', promise);
+    }
+
+    return true;
+  }
+
+  async processNextItem() {
     if (this.pending.length < this.maxConcurrent) {
       if (!this.queued.length) { return false; }
-      this.moveLists(this.queued[0], 'queued', 'pending');
 
-      if (this.blocked) {
-        await this.block;
-      }
-
-      let promise;
-
-      try {
-        promise = this.queuedFuncs.shift()();
-        await promise;
-        this.moveLists(promise, 'pending', 'complete');
-        this.triggerEvent('complete', promise);
-      } catch (e) {
-        // the parent's while will handle retries
-        if (tryNumber > 0) return;
-
-        if (this.retry) {
-          while (tryNumber < this.maxRetries) {
-            const res = await this.processNextItem(tryNumber + 1);
-
-            if (res) return;
-          }
-        }
-
-        this.moveLists(promise, 'pending', 'failed');
-        this.triggerEvent('failed', promise);
-      }
+      const promise = this.queued[0];
+      this.moveLists(promise, 'queued', 'pending');
+      await this.runFunction(this.queuedFuncs.shift(), promise);
 
       // process next
       return true;
