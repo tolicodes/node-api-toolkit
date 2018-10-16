@@ -6,7 +6,7 @@
     "test": "jest"
   },
   "author": "",
-  "license": "ISC",
+  "license": "See License in ./LICENSE file",
   "directories": {
     "doc": "docs"
   },
