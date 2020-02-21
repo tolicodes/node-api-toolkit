@@ -1,17 +1,14 @@
 {
-  "name": "api-toolkit",
-  "version": "1.1.0",
-  "main": "index.js",
+  "name": "@node-api-toolkit/queue",
   "scripts": {
+    "start": "ts-node .",
     "test": "jest --config jest.config.json --runInBand",
     "test:watch": "yarn test --watch"
   },
-  "author": "",
-  "license": "See License in ./LICENSE file",
-  "directories": {
-    "doc": "docs"
-  },
-  "description": "",
+  "version": "0.1.0",
+  "main": "index.ts",
+  "license": "GPL-3.0",
+  "public": true,
   "devDependencies": {
     "@types/jest": "^25.1.2",
     "@types/node": "^13.7.1",
@@ -21,5 +18,9 @@
     "ts-jest": "^25.2.0",
     "ts-node": "^8.6.2",
     "typescript": "^3.7.5"
+  },
+  "dependencies": {
+    "@node-api-toolkit/wait": "^0.1.0",
+    "moment": "^2.24.0"
   }
 }

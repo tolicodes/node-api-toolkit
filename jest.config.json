@@ -1,0 +1,7 @@
+{
+  "testEnvironment": "node",
+  "transform": {
+    "^.+\\.tsx?$": "ts-jest"
+  },
+  "watchPlugins": ["jest-watch-lerna-packages"]
+}
