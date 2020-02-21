@@ -5,7 +5,7 @@
     "test": "jest --config jest.config.json --runInBand",
     "test:watch": "yarn test --watch"
   },
-  "version": "0.4.0",
+  "version": "0.5.0",
   "publishConfig": {
     "access": "public"
   },
