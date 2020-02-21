@@ -4,9 +4,9 @@ import { v4 as uuid } from "uuid";
 
 const readFileAsync = promisify(readFile);
 
-import saveToken, { SAVE_TOKEN_FILE_PREFIX } from "../";
+import saveToken, { SAVE_TOKEN_FILE_PREFIX } from "../saveToken";
 
-describe("@node-api-toolkit/save-token", () => {
+describe("@node-api-toolkit/save-token/saveToken", () => {
   it("should take a token identifier and token and save to TMP file", async () => {
     await saveToken({
       tokenIdentifier: "TEST_TOKEN",
