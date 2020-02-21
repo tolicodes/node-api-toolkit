@@ -6,6 +6,9 @@
     "test:watch": "yarn test --watch"
   },
   "version": "0.4.0",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "index.ts",
   "license": "GPL-3.0",
   "public": true,
@@ -23,5 +26,5 @@
     "@node-api-toolkit/wait": "^0.4.0",
     "moment": "^2.24.0"
   },
-  "gitHead": "7fd5dd592a0141e9f22e7f88c2f81b11b3296d3b"
+  "gitHead": "c344c7bacee201377e4a42409878c85c20a66769"
 }
