@@ -18,7 +18,7 @@ describe("@node-api-toolkit/save-token/getToken", () => {
   });
 
   it("should take a filePath and read the token from it", async () => {
-    const filePath = `/tmp/nodeApiToolkit-save-token-test-custom-file-${uuid()}`;
+    const filePath = `/tmp/node-api-toolkit-save-token-test-custom-file-${uuid()}`;
     await saveToken({
       token: "I_AM_A_TOKEN",
       filePath

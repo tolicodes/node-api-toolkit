@@ -3,7 +3,7 @@ import { promisify } from "util";
 
 const writeFileAsync = promisify(writeFile);
 
-export const SAVE_TOKEN_FILE_PREFIX = "/tmp/nodeApiToolkit-save-token-";
+export const SAVE_TOKEN_FILE_PREFIX = "/tmp/node-api-toolkit-save-token-";
 
 export type SaveTokenOpts = {
   token: string;

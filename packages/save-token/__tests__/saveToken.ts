@@ -20,8 +20,8 @@ describe("@node-api-toolkit/save-token/saveToken", () => {
     expect(token).toEqual("I_AM_A_TOKEN");
   });
 
-  it("should take a token and save to a custom file", async () => {
-    const filePath = `/tmp/nodeApiToolkit-save-token-test-custom-file-${uuid()}`;
+  it("should take a token and filePath to save to a custom file", async () => {
+    const filePath = `/tmp/node-api-toolkit-save-token-test-custom-file-${uuid()}`;
     await saveToken({
       token: "I_AM_A_TOKEN",
       filePath

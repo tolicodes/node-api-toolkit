@@ -2,6 +2,12 @@
 
 A small utility to write your tokens to the file system to easily retrieve later
 
+## Installation
+
+```bash
+yarn add @node-api-toolkit/save-token
+```
+
 ## Usage
 
 There are two modes of usage:
