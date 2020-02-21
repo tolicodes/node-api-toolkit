@@ -20,7 +20,8 @@
     "lerna": "^3.20.0",
     "ts-jest": "^25.2.0",
     "ts-node": "^8.6.2",
-    "typescript": "^3.7.5"
+    "typescript": "^3.7.5",
+    "uuid": "^3.4.0"
   },
   "dependencies": {},
   "gitHead": "c344c7bacee201377e4a42409878c85c20a66769"

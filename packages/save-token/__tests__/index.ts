@@ -1,5 +1,6 @@
 import { readFile } from "fs";
 import { promisify } from "util";
+import { v4 as uuid } from "uuid";
 
 const readFileAsync = promisify(readFile);
 
@@ -15,6 +16,18 @@ describe("@node-api-toolkit/save-token", () => {
     const token = (
       await readFileAsync(`${SAVE_TOKEN_FILE_PREFIX}TEST_TOKEN`)
     ).toString();
+
+    expect(token).toEqual("I_AM_A_TOKEN");
+  });
+
+  it("should take a token and save to a custom file", async () => {
+    const filePath = `/tmp/nodeApiToolkit-save-token-test-custom-file-${uuid()}`;
+    await saveToken({
+      token: "I_AM_A_TOKEN",
+      filePath
+    });
+
+    const token = (await readFileAsync(filePath)).toString();
 
     expect(token).toEqual("I_AM_A_TOKEN");
   });
