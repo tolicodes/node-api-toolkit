@@ -1,5 +1,6 @@
 {
   "name": "@node-api-toolkit/website",
+  "version": "0.3.0",
   "scripts": {
     "examples": "docusaurus-examples",
     "start": "docusaurus-start",
@@ -9,7 +10,8 @@
     "version": "docusaurus-version",
     "rename-version": "docusaurus-rename-version"
   },
-  "devDependencies": {
-    "docusaurus": "^1.3.3"
+  "devDependencies": {},
+  "dependencies": {
+    "docusaurus": "^1.14.4"
   }
 }
