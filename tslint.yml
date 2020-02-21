@@ -1,0 +1,14 @@
+extends:
+  - tslint:latest
+  - tslint-config-prettier
+rules:
+  typedef:
+    - true
+    - call-signature
+    - parameter
+    - arrow-call-signature
+    - property-declaration
+    - variable-declaration
+    - member-variable-declaration
+    - object-destructuring
+    - array-destructuring

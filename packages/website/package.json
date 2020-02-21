@@ -1,4 +1,5 @@
 {
+  "name": "@node-api-toolkit/website",
   "scripts": {
     "examples": "docusaurus-examples",
     "start": "docusaurus-start",
