@@ -1,5 +1,5 @@
 {
-  "name": "@node-api-toolkit/queue",
+  "name": "@node-api-toolkit/save-token",
   "scripts": {
     "start": "ts-node .",
     "test": "jest --config jest.config.json --runInBand",
@@ -20,11 +20,8 @@
     "lerna": "^3.20.0",
     "ts-jest": "^25.2.0",
     "ts-node": "^8.6.2",
-    "typescript": "^3.7.5"
-  },
-  "dependencies": {
-    "@node-api-toolkit/wait": "^0.6.0",
-    "moment": "^2.24.0"
+    "typescript": "^3.7.5",
+    "uuid": "^3.4.0"
   },
   "gitHead": "c344c7bacee201377e4a42409878c85c20a66769"
 }
