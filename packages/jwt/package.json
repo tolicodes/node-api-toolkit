@@ -1,0 +1,24 @@
+{
+  "name": "@node-api-toolkit/jwt",
+  "scripts": {
+    "start": "ts-node .",
+    "test": "jest --config jest.config.json --runInBand",
+    "test:watch": "yarn test --watch"
+  },
+  "version": "0.6.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.ts",
+  "license": "GPL-3.0",
+  "public": true,
+  "devDependencies": {
+    "@types/jest": "^25.1.2",
+    "@types/node": "^13.7.1",
+    "express": "^4.17.1",
+    "jest": "^25.1.0",
+    "ts-jest": "^25.2.0",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.7.5"
+  }
+}
