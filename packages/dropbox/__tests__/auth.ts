@@ -34,23 +34,22 @@ describe("@node-api-toolkit/dropbox/auth", () => {
     // this function gets called when an oauth is successful
     // it needs to return back the user that it was given
     // with possible metadata attached
-    const onOauthSuccess = jest.fn().mockResolvedValue({
-      userId: "123",
-      email: "franz@dropbox.com",
-      name: {
-        givenName: "Franz",
-        surname: "Ferdinand",
-        displayName: "Franz Ferdinand (Personal)"
-      },
-      // this isn't verified
-      profile: {
-        someField: "123"
-      },
-      // attaching metadata
-      metadata: {
-        someKey: true
-      }
-    });
+    const onOauthSuccess = jest
+      .fn()
+      .mockImplementation(({ accessToken, refreshToken, profile }) => {
+        return new Promise(resolve => {
+          const modifiedUser = {
+            ...profile,
+            // attaching metadata
+            metadata: {
+              jwtToken: "123"
+            }
+          };
+
+          // we usually would do something to link the access token to the user
+          resolve(modifiedUser);
+        });
+      });
 
     // adds auth endpoints to the expressApp
     auth({
