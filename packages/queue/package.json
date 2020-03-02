@@ -5,7 +5,7 @@
     "test": "jest --config jest.config.json --runInBand",
     "test:watch": "yarn test --watch"
   },
-  "version": "0.7.0",
+  "version": "0.8.0",
   "publishConfig": {
     "access": "public"
   },
@@ -23,7 +23,7 @@
     "typescript": "^3.7.5"
   },
   "dependencies": {
-    "@node-api-toolkit/wait": "^0.7.0",
+    "@node-api-toolkit/wait": "^0.8.0",
     "moment": "^2.24.0"
   },
   "gitHead": "c344c7bacee201377e4a42409878c85c20a66769"
