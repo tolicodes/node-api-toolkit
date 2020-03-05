@@ -3,13 +3,14 @@
   "scripts": {
     "start": "ts-node .",
     "test": "jest --config jest.config.json --runInBand",
-    "test:watch": "yarn test --watch"
+    "test:watch": "yarn test --watch",
+    "build": "tsc"
   },
+  "main": "dist/index.js",
   "version": "0.8.0",
   "publishConfig": {
     "access": "public"
   },
-  "main": "index.ts",
   "license": "GPL-3.0",
   "public": true,
   "devDependencies": {
@@ -20,6 +21,7 @@
     "nock": "^12.0.1",
     "ts-jest": "^25.2.0",
     "ts-node": "^8.6.2",
+    "tsc": "^1.20150623.0",
     "typescript": "^3.7.5"
   },
   "dependencies": {

@@ -1,7 +1,7 @@
 {
   "name": "api-toolkit",
   "version": "1.1.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "jest --config jest.config.json --runInBand",
     "test:watch": "yarn test --watch"
