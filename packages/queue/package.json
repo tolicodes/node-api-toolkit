@@ -7,7 +7,7 @@
     "build": "tsc"
   },
   "main": "dist/index.js",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "publishConfig": {
     "access": "public"
   },
@@ -25,7 +25,7 @@
     "typescript": "^3.7.5"
   },
   "dependencies": {
-    "@node-api-toolkit/wait": "^0.8.0",
+    "@node-api-toolkit/wait": "^0.9.0",
     "moment": "^2.24.0"
   },
   "gitHead": "c344c7bacee201377e4a42409878c85c20a66769"
