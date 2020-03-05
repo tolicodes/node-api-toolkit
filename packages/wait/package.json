@@ -3,23 +3,23 @@
   "scripts": {
     "start": "ts-node .",
     "test": "jest --config jest.config.json --runInBand",
-    "test:watch": "yarn test --watch"
+    "test:watch": "yarn test --watch",
+    "build": "tsc"
   },
+  "main": "dist/index.js",
   "version": "0.8.0",
   "publishConfig": {
     "access": "public"
   },
-  "main": "index.ts",
   "license": "GPL-3.0",
   "public": true,
   "devDependencies": {
     "@types/jest": "^25.1.2",
     "@types/node": "^13.7.1",
     "jest": "^25.1.0",
-    "jest-watch-lerna-packages": "^1.1.0",
-    "lerna": "^3.20.0",
     "ts-jest": "^25.2.0",
     "ts-node": "^8.6.2",
+    "tsc": "^1.20150623.0",
     "typescript": "^3.7.5"
   },
   "gitHead": "c344c7bacee201377e4a42409878c85c20a66769"

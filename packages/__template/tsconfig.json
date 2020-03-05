@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
-    "preserveSymlinks": true
+    "preserveSymlinks": true,
+    "outDir": "dist",
+    "esModuleInterop": true
   }
 }
