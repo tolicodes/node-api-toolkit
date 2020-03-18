@@ -4,7 +4,7 @@
     "start": "ts-node .",
     "test": "jest --config jest.config.json --runInBand",
     "test:watch": "yarn test --watch",
-    "build": "tsc",
+    "build": "tsc --verbose --build",
     "create-dropbox-token-file": "generate-oauth-token-cli --oauthStrategy passport-dropbox-oauth2 --oauthStrategyOptions.apiVersion 2 --saveTokenToFile --appKey=$DROPBOX_APP_KEY --appSecret=$DROPBOX_APP_SECRET",
     "create-jest-dropbox-token-file": "create-dropbox-token-file --tokenId=JEST_NODE_API_TOOLKIT_DROPBOX_PROTOTYPE_TOKEN"
   },
