@@ -3,11 +3,13 @@
   "version": "1.1.4",
   "main": "dist/index.js",
   "scripts": {
-    "test": "jest --config jest.config.json --runInBand",
+    "test": "jest --config jest.config.json",
     "test:watch": "yarn test --watch",
-    "sync-packages": "syncpack fix-mismatches",
     "test:debug": "DEBUG=* yarn test --verbose",
     "test:watch:debug": "yarn test:debug --watch",
+    "test:integration": "USE_REAL_API=true yarn test",
+    "test:integration:watch": "yarn test:integration --watch",
+    "sync-packages": "syncpack fix-mismatches",
     "publish": "yarn run sync-packages && lerna run build && lerna exec --concurrency 1 -- npx --no-install semantic-release -e semantic-release-monorepo"
   },
   "author": "",

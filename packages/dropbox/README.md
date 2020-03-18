@@ -119,4 +119,21 @@ auth({
 
 ## Tests
 
-This package is thoroughly testted. All tests located in [`__tests__`](__tests__/)
+This package is thoroughly tested. All tests located in [`__tests__`](__tests__/)
+
+You should run tests from the monorepo root. But you can also run them individually.
+
+Both accept the following `yarn run` commands:
+
+- `yarn run test`: Runs tests with mocks (mocks API)
+- `test:watch`: Watches tests (use for development)
+- `test:debug`: Prints debug information
+- `yarn run test:watch:debug`: Prints debug info in watch mode
+- `yarn run test:integration`: Uses the real APIs to test. Note you need to set up the token using `yarn run create-jest-dropbox-token-file`
+- `yarn run test:integration:watch`: Uses the real APIs to test in watch mode. Note you need to set up the token using `yarn run create-jest-dropbox-token-file`
+
+To run tests with the real API, you must first generate a JEST token.
+
+```bash
+yarn run create-jest-dropbox-token-file
+```
