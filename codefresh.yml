@@ -31,7 +31,7 @@ steps:
       image: "node:latest"
       commands:
         - npm i -g lerna
-        - yarn run test
+        - yarn run test:debug
   publish:
     title: Publish packages
     stage: "publish"

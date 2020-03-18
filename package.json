@@ -6,6 +6,8 @@
     "test": "jest --config jest.config.json --runInBand",
     "test:watch": "yarn test --watch",
     "sync-packages": "syncpack fix-mismatches",
+    "test:debug": "DEBUG=* yarn test --verbose",
+    "test:watch:debug": "yarn test:debug --watch",
     "publish": "yarn run sync-packages && lerna run build && lerna exec --concurrency 1 -- npx --no-install semantic-release -e semantic-release-monorepo"
   },
   "author": "",
