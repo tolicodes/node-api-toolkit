@@ -4,7 +4,9 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "jest --config jest.config.json --runInBand",
-    "test:watch": "yarn test --watch"
+    "test:watch": "yarn test --watch",
+    "sync-packages": "syncpack fix-mismatches",
+    "publish": "yarn run sync-packages && lerna run build && lerna exec --concurrency 1 -- npx --no-install semantic-release -e semantic-release-monorepo"
   },
   "author": "",
   "license": "See License in ./LICENSE file",
@@ -13,13 +15,32 @@
   },
   "description": "",
   "devDependencies": {
+    "@semantic-release/changelog": "^5.0.0",
+    "@semantic-release/commit-analyzer": "^8.0.1",
+    "@semantic-release/git": "^9.0.0",
+    "@semantic-release/release-notes-generator": "^9.0.1",
     "@types/jest": "^25.1.2",
     "@types/node": "^13.7.1",
+    "cz-conventional-changelog": "^3.1.0",
+    "husky": "^4.2.3",
     "jest": "^25.1.0",
     "jest-watch-lerna-packages": "^1.1.0",
     "lerna": "^3.20.0",
+    "semantic-release": "^17.0.4",
+    "semantic-release-monorepo": "^7.0.1",
+    "syncpack": "^5.0.1",
     "ts-jest": "^25.2.0",
     "ts-node": "^8.6.2",
     "typescript": "^3.7.5"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "husky": {
+    "hooks": {
+      "prepare-commit-msg": "exec < /dev/tty && git cz --hook || true"
+    }
   }
 }
