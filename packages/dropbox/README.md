@@ -14,6 +14,14 @@ yarn add @node-api-toolkit/dropbox
 
 ## Usage
 
+### To Prototype
+
+Run
+
+```bash
+yarn run create-dropbox-token-file --tokenIdentifier YOUR-TOKEN-IDENTIFIER
+```
+
 ### @node-api-toolkit/dropbox/auth
 
 ```typescript

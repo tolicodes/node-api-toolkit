@@ -21,12 +21,19 @@ export type GetTokenFromFileOpts = {
 export default async ({
   tokenIdentifier = tokenIdentifierArg || JEST_TOKEN_IDENTIFIER
 }: GetTokenFromFileOpts = {}): Promise<string> => {
-  return (
-    // for use in CI
-    NODE_API_TOOLKIT_DROPBOX_PROTOTYPE_TOKEN ||
-    // get from file
-    getToken({
+  // for use in CI
+  if (NODE_API_TOOLKIT_DROPBOX_PROTOTYPE_TOKEN) {
+    return NODE_API_TOOLKIT_DROPBOX_PROTOTYPE_TOKEN;
+  }
+
+  // get from file
+  try {
+    return getToken({
       tokenIdentifier
-    })
-  );
+    });
+  } catch (e) {
+    throw new Error(
+      "Couldn't find dropbox API Token. You must run `yarn run create-jest-dropbox-token-file` to create the jest token file, use the NODE_API_TOOLKIT_DROPBOX_PROTOTYPE_TOKEN environmental variable, or programmatically pass the token you created using `yarn run create-dropbox-token-file`"
+    );
+  }
 };
