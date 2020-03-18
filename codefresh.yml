@@ -30,7 +30,7 @@ steps:
       image: "node:latest"
       commands:
         - npm i -g lerna
-        - lerna run test
+        - yarn run test
   publish:
     title: Publish packages
     stage: "publish"
