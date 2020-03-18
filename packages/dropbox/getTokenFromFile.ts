@@ -28,7 +28,7 @@ export default async ({
 
   // get from file
   try {
-    return getToken({
+    return await getToken({
       tokenIdentifier
     });
   } catch (e) {
