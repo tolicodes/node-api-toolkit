@@ -1,3 +1,10 @@
+# [@node-api-toolkit/__template-v1.0.1](https://github.com/tolicodes/node-api-toolkit/compare/@node-api-toolkit/__template-v1.0.0...@node-api-toolkit/__template-v1.0.1) (2020-03-18)
+
+
+### Bug Fixes
+
+* **common:** debugging integration tests ([777e0ef](https://github.com/tolicodes/node-api-toolkit/commit/777e0ef46e62eefc8acede558bc122c5a9f37c6e))
+
 # @node-api-toolkit/__template-v1.0.0 (2020-03-18)
 
 
