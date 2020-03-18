@@ -27,4 +27,8 @@ describe("@node-api-toolkit/dropbox/getTokenFromFile", () => {
       expect(token).toEqual("123");
     }
   });
+
+  it.todo(
+    "should accept an environmental variable called NODE_API_TOOLKIT_DROPBOX_PROTOTYPE_TOKEN"
+  );
 });

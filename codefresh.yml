@@ -32,6 +32,17 @@ steps:
       commands:
         - npm i -g lerna
         - yarn run test:debug
+
+  integration_test:
+    title: Integration Test packages
+    stage: "test"
+    type: freestyle
+    working_directory: "./node-api-toolkit"
+    arguments:
+      image: "node:latest"
+      commands:
+        - npm i -g lerna
+        - yarn run test:integration:debug
   publish:
     title: Publish packages
     stage: "publish"
