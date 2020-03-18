@@ -22,6 +22,9 @@ Run
 yarn run create-dropbox-token-file --tokenIdentifier YOUR-TOKEN-IDENTIFIER
 ```
 
+Then you can manually use the token by using [`save-token/getToken`](../save-token). Read those
+docs for more info
+
 ### @node-api-toolkit/dropbox/auth
 
 ```typescript
