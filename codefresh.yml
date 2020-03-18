@@ -40,7 +40,7 @@ steps:
     arguments:
       image: "node:latest"
       commands:
-        - yarn run publish
+        - yarn run publish --concurrency 1
     when:
       branch:
         only:
