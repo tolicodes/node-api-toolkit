@@ -20,6 +20,7 @@ steps:
       image: "node:latest"
       commands:
         - npm i -g lerna
+        - yarn
         - lerna bootstrap
   test:
     title: Test packages
