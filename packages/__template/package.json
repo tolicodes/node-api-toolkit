@@ -4,6 +4,12 @@
     "start": "ts-node .",
     "test": "jest --config jest.config.json --runInBand",
     "test:watch": "yarn test --watch",
+    "test:debug": "DEBUG=* yarn test --verbose",
+    "test:watch:debug": "yarn test:debug --watch",
+    "test:integration": "USE_REAL_API=true yarn test",
+    "test:integration:watch": "yarn test:integration --watch",
+    "test:integration:debug": "DEBUG=* yarn run test:integration --verbose",
+    "test:integration:debug:watch": "yarn run test:integration:debug --watch",
     "build": "tsc --build --verbose"
   },
   "main": "dist/index.js",
