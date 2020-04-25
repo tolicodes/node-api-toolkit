@@ -169,7 +169,7 @@ export default class Queue {
    * The purpose is if we want some kind of reporting on running
    * functions
    */
-  private promiseNameMap: [string, Promise<any>][] = [];
+  private functionNameMap: [string, Promise<any>][] = [];
 
   /**
    * Contains the function to clear the current block timeout
@@ -223,7 +223,9 @@ export default class Queue {
     // you have the ability to name a function you add so that you can reference it using
     // a progress bar or debug info
     if (name) {
-      this.promiseNameMap.push([name, wrapperPromise]);
+      this.functionNameMap[name] = {
+        promise: wrapperPromise,
+      };
     }
 
     this.debug(`Adding new function "${name}"`);
@@ -290,7 +292,7 @@ export default class Queue {
    * @param promise - the promise who's name to get
    */
   public getPromiseName(promise: Promise<any>): string {
-    const promiseMap = this.promiseNameMap.find(([, p]) => p === promise);
+    const promiseMap = this.functionNameMap.find(([, p]) => p === promise);
 
     // the 0th key is the name
     return promiseMap && promiseMap[0];
@@ -642,11 +644,11 @@ export default class Queue {
    * @param tmpFile
    */
   private async initTmpFile(tmpFile) {
+    // @todo
     if (tmpFile) {
-      this.tmpFile = tmpFile;
-      const data = await readTmpFile({ path: tmpFile });
-      // console.log(data);
-      return;
+      // this.tmpFile = tmpFile;
+      // const data = await readTmpFile({ path: tmpFile });
+      // return;
     }
 
     this.tmpFile = createTmpFile();

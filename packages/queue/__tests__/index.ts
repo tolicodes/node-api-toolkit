@@ -11,7 +11,7 @@ describe("@node-api-toolkit/queue", () => {
 
     asyncFunc = jest.fn().mockImplementation(
       () =>
-        new Promise(res => {
+        new Promise((res) => {
           setTimeout(() => res({ some: "data" }), 100);
         })
     );
@@ -91,4 +91,16 @@ describe("@node-api-toolkit/queue", () => {
       expect(queued).toHaveBeenCalledWith("queued", promise);
     });
   });
+
+  describe("tmpFile", () => {
+    it.todo("should create a new tmp file if one is not specified");
+    it.todo("should load an existing tmp file if one is specified");
+    it.todo("should append to tmp file if one is specified");
+  });
+
+  it("should output debug information");
+
+  it(
+    "should not be stopped if a function is added in the end of a running function"
+  );
 });
