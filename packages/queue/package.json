@@ -4,10 +4,11 @@
     "start": "ts-node .",
     "test": "jest --config jest.config.json --runInBand",
     "test:watch": "yarn test --watch",
-    "build": "tsc --build --verbose"
+    "build": "tsc --build --verbose",
+    "build:watch": "tsc --build --verbose --watch"
   },
   "main": "dist/index.js",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "publishConfig": {
     "access": "public"
   },
@@ -26,7 +27,11 @@
   },
   "dependencies": {
     "@node-api-toolkit/wait": "^0.9.0",
-    "moment": "^2.24.0"
+    "chalk": "^4.0.0",
+    "debug": "^4.1.1",
+    "humanize-duration": "^3.22.0",
+    "moment": "^2.24.0",
+    "pretty-bytes": "^5.3.0"
   },
   "gitHead": "c344c7bacee201377e4a42409878c85c20a66769"
 }

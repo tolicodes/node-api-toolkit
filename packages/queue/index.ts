@@ -1,5 +1,8 @@
 import moment = require("moment");
 import wait from "@node-api-toolkit/wait";
+const debug = require("debug");
+
+import { createTmpFile, writeTmpFile, readTmpFile } from "./writeTmpFile";
 
 enum QueueEvent {
   // added to queue, waiting to start
@@ -18,7 +21,7 @@ enum QueueEvent {
   "blocked" = "blocked",
 
   // the function just got unblocked and is running
-  "unblocked" = "unblocked"
+  "unblocked" = "unblocked",
 }
 
 enum FunctionState {
@@ -32,7 +35,7 @@ enum FunctionState {
   "complete" = "complete",
 
   // function failed running (including retries)
-  "failed" = "failed"
+  "failed" = "failed",
 }
 
 type QueueOpts = {
@@ -41,6 +44,7 @@ type QueueOpts = {
   maxRetries?: number;
   waitBetweenRequests?: number;
   autoStart?: boolean;
+  tmpFile?: string;
 };
 
 // the function that's called when an event happens
@@ -126,6 +130,11 @@ export default class Queue {
    */
   private maxRetries: number;
 
+  /**
+   * tmp file that the records are saved under in case there is an error
+   */
+  private tmpFile: string;
+
   // PRIVATE PROPERTIES
   /**
    * Maps a state to a promise array
@@ -134,7 +143,7 @@ export default class Queue {
     queued: this.queuedPromises,
     pending: this.pendingPromises,
     complete: this.completePromises,
-    failed: this.failedPromises
+    failed: this.failedPromises,
   };
 
   /**
@@ -152,7 +161,7 @@ export default class Queue {
     complete: [],
     failed: [],
     blocked: [],
-    unblocked: []
+    unblocked: [],
   };
 
   /**
@@ -168,6 +177,8 @@ export default class Queue {
    */
   private clearBlockTimeout: () => void;
 
+  private debug = debug("@node-api-toolkit/queue");
+
   /**
    * Sets the options for the queue
    * @param param0.maxConcurrent - How many functions can be processing at once
@@ -177,17 +188,20 @@ export default class Queue {
    * @param param0.autoStart - Should the queue automatically start when a function is added
    */
   constructor({
-    maxConcurrent = Infinity,
+    maxConcurrent = 1,
     retry = false,
     maxRetries = 3,
     waitBetweenRequests = 1000,
-    autoStart = true
+    autoStart = true,
+    tmpFile,
   }: QueueOpts = {}) {
     this.maxConcurrent = maxConcurrent;
     this.retry = retry;
     this.maxRetries = maxRetries;
     this.waitBetweenFunctionRuns = waitBetweenRequests;
     this.autoStart = autoStart;
+
+    this.initTmpFile(tmpFile);
   }
 
   /**
@@ -202,13 +216,17 @@ export default class Queue {
     let resolve;
 
     // we export the resolve function so that we can do it below (can't self reference it)
-    const wrapperPromise = new Promise(r => {
+    const wrapperPromise = new Promise((r) => {
       resolve = r;
     });
 
+    // you have the ability to name a function you add so that you can reference it using
+    // a progress bar or debug info
     if (name) {
       this.promiseNameMap.push([name, wrapperPromise]);
     }
+
+    this.debug(`Adding new function "${name}"`);
 
     this.queuedPromises.push(wrapperPromise);
     this.triggerEvent(QueueEvent.queued, wrapperPromise);
@@ -218,6 +236,8 @@ export default class Queue {
     // also resolve the wrapping Promise
     this.queuedFuncs.push(async () => {
       const result = await func();
+
+      this.debug(`Function "${name}" resolved`);
       resolve(result);
       return result;
     });
@@ -226,6 +246,7 @@ export default class Queue {
       // if the queue is stopped (or not started) and autoStart is enabled
       // then we can just start processing the queue
       if (this.stopped && this.autoStart) {
+        this.debug("Auto-starting queue");
         this.process();
       }
     });
@@ -237,12 +258,31 @@ export default class Queue {
    * Processes the queue
    * @returns all the results when finished
    */
-  public async process(): Promise<any> {
+  public async process() {
+    this.stopped = false;
+    this.debug("Starting processing");
     while (this.queuedFuncs.length) {
+      this.debug("Processing next item");
       await this.processNextItem();
     }
 
-    return Promise.all(this.pendingPromises);
+    // we have to do this because a promise may
+    // be added right before the last promise is
+    // resolved. So we have to keep checking at
+    // each resolution if new promises have been
+    // added
+    let hasPendingPromises = true;
+    while (hasPendingPromises) {
+      // wait for everything pending to finish
+      await Promise.all([...this.pendingPromises, ...this.queuedPromises]);
+      if (!this.pendingPromises.length) {
+        hasPendingPromises = false;
+      }
+    }
+
+    // stop the queue
+    this.debug("Processing complete. Stopping queue");
+    this.stopped = true;
   }
 
   /**
@@ -259,14 +299,24 @@ export default class Queue {
   /**
    * Await this function to know when the queue finishes running
    */
-  public isDone() {
+  public async isDone(): Promise<any[]> {
     // if there are no queued or pending promises, we are done
     if (!this.queuedPromises.length && !this.pendingPromises.length) {
-      return true;
+      this.debug("No more pending or queued promises. Queue is done running");
+
+      // return the results of the promises
+      return Promise.all(this.completePromises);
     }
 
-    // wait for all the pending and queued promises to finish
-    return Promise.all([...this.pendingPromises, ...this.queuedPromises]);
+    // wait for all the current pending and queued promises to finish
+    await Promise.all([...this.pendingPromises, ...this.queuedPromises]);
+
+    // check if we have any new promises
+    return this.isDone();
+  }
+
+  public then() {
+    return this.isDone();
   }
 
   /**
@@ -281,7 +331,7 @@ export default class Queue {
     // if we want to listen to all events then we
     // add the callback
     if (event === "all") {
-      QUEUE_EVENTS.forEach(e => {
+      QUEUE_EVENTS.forEach((e) => {
         this.eventListeners[e].push(cb);
       });
     } else {
@@ -311,7 +361,7 @@ export default class Queue {
       return this.blockPromise;
     }
 
-    this.pendingPromises.forEach(promise => {
+    this.pendingPromises.forEach((promise) => {
       this.triggerEvent(QueueEvent.blocked, promise);
     });
 
@@ -323,7 +373,7 @@ export default class Queue {
 
     // the queue is listening to this promise to know when
     // to continue running
-    this.blockPromise = new Promise(resolve => {
+    this.blockPromise = new Promise((resolve) => {
       // the unblock function will unblock the queue
       this.unblockQueue = () => {
         delete this.unblockQueue;
@@ -335,7 +385,7 @@ export default class Queue {
         // the event fires
         resolve();
 
-        this.pendingPromises.forEach(promise => {
+        this.pendingPromises.forEach((promise) => {
           this.triggerEvent(QueueEvent.unblocked, promise);
         });
       };
@@ -389,7 +439,7 @@ export default class Queue {
       ...this.queuedPromises,
       ...this.pendingPromises,
       ...this.completePromises,
-      ...this.failedPromises
+      ...this.failedPromises,
     ];
   }
 
@@ -438,6 +488,13 @@ export default class Queue {
     );
   }
 
+  /**
+   * Gets the temp file path
+   */
+  public getTmpFile() {
+    return this.tmpFile;
+  }
+
   // PRIVATE METHODS
 
   /**
@@ -447,7 +504,7 @@ export default class Queue {
    */
   private triggerEvent(event: QueueEvent, promise: Promise<any>): void {
     if (!this.eventListeners[event]) return;
-    this.eventListeners[event].forEach(cb => {
+    this.eventListeners[event].forEach((cb) => {
       cb(event, promise);
     });
   }
@@ -468,7 +525,7 @@ export default class Queue {
 
     if (!fromList.includes(promise)) {
       throw Error(
-        `Promise ${this.getPromiseName(promise)} is not in list ${from}`
+        `Function "${this.getPromiseName(promise)}" is not in list ${from}`
       );
     }
 
@@ -492,32 +549,51 @@ export default class Queue {
     promise: Promise<any>,
     tryNumber: number = 0
   ): Promise<boolean> {
+    const functionName = this.getPromiseName(promise);
     if (this.waitBetweenFunctionRuns) {
+      this.debug(
+        `Waiting to start function - ${this.waitBetweenFunctionRuns}ms`
+      );
       await wait(this.waitBetweenFunctionRuns);
     }
 
     // if a function is running we wait for it to finish
     if (this.blocked) {
+      this.debug(`Queue is blocked`);
       await this.blockPromise;
+      this.debug(`Queue is unblocked`);
     }
 
     // try to run the function and retry if it fails
     try {
-      await func();
+      const data = await func();
+
+      writeTmpFile({
+        path: this.tmpFile,
+        data,
+      });
+
+      this.debug(`Function completed "${functionName}"`);
       this.changeState(promise, FunctionState.pending, FunctionState.complete);
       this.triggerEvent(QueueEvent.complete, promise);
     } catch (e) {
+      this.debug(`Function failed running "${functionName}"`);
       if (this.retry && tryNumber < this.maxRetries) {
+        this.debug(
+          `Function "${functionName}" failed. Retrying function . Try # ${tryNumber}`
+        );
         const res = await this.runFunction(func, promise, tryNumber + 1);
 
         if (res) return true;
-
-        this.changeState(promise, FunctionState.pending, FunctionState.failed);
-        this.triggerEvent(QueueEvent.failed, promise);
-
-        // function failed
-        return false;
       }
+
+      this.debug(`Function "${functionName}" failed. Not retrying`);
+      this.changeState(promise, FunctionState.pending, FunctionState.failed);
+      this.triggerEvent(QueueEvent.failed, promise);
+
+      e.tmpFile = this.tmpFile;
+
+      throw e;
     }
 
     return true;
@@ -533,6 +609,7 @@ export default class Queue {
     if (this.pendingPromises.length < this.maxConcurrent) {
       // if there are no more queued items then we can stop processing
       if (!this.queuedPromises.length) {
+        this.debug("Finished processing");
         return false;
       }
 
@@ -542,16 +619,36 @@ export default class Queue {
 
       // run the function corresponding to that promise
       const functionToRun = this.queuedFuncs.shift();
-      await this.runFunction(functionToRun, promise);
+      this.debug(`Running function "${this.getPromiseName(promise)}"`);
+      this.runFunction(functionToRun, promise);
 
       // process next
       return true;
     }
 
+    this.debug(
+      `Reached max concurrent "${this.maxConcurrent}". Waiting for completion`
+    );
     // wait for something to succeed or fail
     await Promise.race(this.pendingPromises);
 
     // keep processing!
     return true;
+  }
+
+  /**
+   * If a tmpFile is given, load it and set it
+   * Otherwise create a new one
+   * @param tmpFile
+   */
+  private async initTmpFile(tmpFile) {
+    if (tmpFile) {
+      this.tmpFile = tmpFile;
+      const data = await readTmpFile({ path: tmpFile });
+      // console.log(data);
+      return;
+    }
+
+    this.tmpFile = createTmpFile();
   }
 }
