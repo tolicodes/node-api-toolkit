@@ -2,6 +2,8 @@
   "compilerOptions": {
     "preserveSymlinks": true,
     "outDir": "dist",
-    "esModuleInterop": true
-  }
+    "esModuleInterop": true,
+    "resolveJsonModule": true
+  },
+  "exclude": ["__tests__"]
 }

@@ -31,9 +31,13 @@
     "typescript": "^3.7.5"
   },
   "dependencies": {
+    "@node-api-toolkit/queue": "^1.0.0",
     "@node-cli-toolkit/generate-oauth-token-cli": "^0.5.2",
     "axios": "^0.19.2",
+    "dropbox": "^4.0.30",
+    "dropbox-v2-api": "^2.4.13",
     "passport": "^0.4.1",
-    "passport-dropbox-oauth2": "^1.1.0"
+    "passport-dropbox-oauth2": "^1.1.0",
+    "uuid": "^7.0.3"
   }
 }
