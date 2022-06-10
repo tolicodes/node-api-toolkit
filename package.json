@@ -32,7 +32,7 @@
     "jest": "^25.1.0",
     "jest-watch-lerna-packages": "^1.1.0",
     "lerna": "^3.20.0",
-    "semantic-release": "^17.0.4",
+    "semantic-release": "^19.0.3",
     "semantic-release-monorepo": "^7.0.1",
     "syncpack": "^5.0.1",
     "ts-jest": "^25.2.0",
